@@ -1,88 +1,84 @@
-import { useEffect, useRef, useState } from "react";
-import { formatNumber } from "../utils/format";
-
-/**
- * Folio de region: nombre, capital, superficie y poblacion.
- * La poblacion cuenta hacia arriba una sola vez al aparecer en pantalla,
- * como un unico momento de animacion orquestado (no hay mas movimiento en la pagina).
- */
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
+import React from 'react';
+import { regionColor, REGIONS } from '../utils/regions';
+import { formatNumber } from '../utils/format';
 
 export default function StatCard({ region, color, capital, area, population, delay = 0 }) {
-  const [displayValue, setDisplayValue] = useState(() =>
-    prefersReducedMotion() ? population ?? 0 : 0
-  );
-  const ref = useRef(null);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    if (prefersReducedMotion() || !population) {
-      return;
-    }
-
-    const node = ref.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 900;
-          const start = performance.now() + delay;
-
-          function tick(now) {
-            const elapsed = now - start;
-            if (elapsed < 0) {
-              requestAnimationFrame(tick);
-              return;
-            }
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setDisplayValue(Math.round(population * eased));
-            if (progress < 1) requestAnimationFrame(tick);
-          }
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.4 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [population, delay]);
+  const regInfo = REGIONS[region] || {};
+  const accentColor = color || regionColor(region);
 
   return (
-    <div
-      ref={ref}
-      className="bg-[var(--color-paper-deep)]/60 border border-[var(--color-line)] p-6 flex flex-col gap-4"
-      style={{ borderTopWidth: "3px", borderTopColor: color }}
+    <div 
+      className="relative group bg-[#131822] border border-[#212A3B] hover:border-[#334155] rounded-xl p-6 transition-all duration-300 shadow-xl overflow-hidden flex flex-col justify-between"
+      style={{
+        animationDelay: `${delay}ms`
+      }}
     >
-      <div>
-        <h3 className="font-display font-semibold text-2xl text-[var(--color-ink)]">
-          {region}
-        </h3>
-        <p className="font-body text-sm text-[var(--color-ink-muted)] mt-1">
-          Capital: {capital}
-        </p>
-      </div>
+      {/* Resplandor ambiental sutil superior basado en el color de la región */}
+      <div 
+        className="absolute top-0 left-0 right-0 h-1 opacity-80 transition-all duration-300 group-hover:opacity-100"
+        style={{ backgroundColor: accentColor }}
+      />
+      
+      {/* Fondo de brillo radial muy suave */}
+      <div 
+        className="absolute -right-12 -top-12 w-32 h-32 rounded-full pointer-events-none opacity-10 transition-opacity duration-500 group-hover:opacity-20 blur-2xl"
+        style={{ backgroundColor: accentColor }}
+      />
 
       <div>
-        <p className="font-display text-4xl font-medium text-[var(--color-ink)] tabular-nums">
-          {formatNumber(displayValue)}
-        </p>
-        <p className="font-body text-sm text-[var(--color-ink-muted)] mt-1">
-          habitantes registrados
-        </p>
+        {/* Cabecera de la Tarjeta */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <span 
+              className="w-3 h-3 rounded-full shadow-sm"
+              style={{ backgroundColor: accentColor }}
+            />
+            <h3 className="font-serif font-bold text-xl text-[#ECF2F8] tracking-wide">
+              {region}
+            </h3>
+          </div>
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#171F2C] border border-[#212A3B] text-[#8B949E]">
+            REGISTRO ACTIVO
+          </span>
+        </div>
+
+        {/* Capital */}
+        <div className="text-xs font-mono text-[#8B949E] uppercase tracking-wider mb-4 flex items-center gap-1.5">
+          <span>Capital:</span>
+          <span className="text-[#ECF2F8] font-medium capitalize">{capital || regInfo.capital || "—"}</span>
+        </div>
+
+        {/* Cifra Principal de Población */}
+        <div className="my-3">
+          <span className="text-[11px] font-mono text-[#8B949E] uppercase tracking-wider block mb-1">
+            Habitantes Registrados
+          </span>
+          <div className="font-mono text-3xl font-bold text-[#ECF2F8] tracking-tight">
+            {formatNumber(population)}
+          </div>
+        </div>
       </div>
 
-      <p className="font-body text-sm text-[var(--color-ink-muted)] mt-auto pt-2 border-t border-[var(--color-line)]">
-        {formatNumber(area)} km² de superficie
-      </p>
+      {/* Footer de la Tarjeta: Superficie y Mini-Tendencia */}
+      <div className="pt-4 mt-4 border-t border-[#212A3B] flex items-center justify-between">
+        <div className="text-xs font-mono text-[#8B949E]">
+          Superficie: <span className="text-[#ECF2F8] font-semibold">{area ? `${area} km²` : `${regInfo.area || "—"} km²`}</span>
+        </div>
+
+        {/* Minigráfico decorativo (Sparkline) */}
+        <div className="flex items-end gap-1 h-5 opacity-60 group-hover:opacity-100 transition-opacity">
+          {[40, 65, 50, 75, 60, 90].map((val, idx) => (
+            <span 
+              key={idx} 
+              className="w-1 rounded-t transition-all duration-300"
+              style={{ 
+                height: `${val}%`, 
+                backgroundColor: accentColor 
+              }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
