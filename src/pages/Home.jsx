@@ -342,15 +342,21 @@ export default function Home() {
             {/* GRID PRINCIPAL: MAPA (70%) + FICHA TÉCNICA (30%) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Contenedor central / Gráficos */}
               <div className="lg:col-span-2 bg-[#161B22]/60 border border-[#30363D] rounded-xl p-6 shadow-xl backdrop-blur-md">
-                {activeTab === "mapa" && <WorldMap selectedRegion={selectedRegion} />}
-                {activeTab === "barras" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <BarChartComponent data={dataSets.comp} dataKey="Habitantes" title="Población por Continente" />
-                    <BarChartComponent data={dataSets.flores} dataKey="Cantidad de flores" title="Producción de Flores" />
-                  </div>
-                )}
+  
+  {activeTab === "mapa" && (
+    <WorldMap 
+      selectedRegion={selectedRegion} 
+      setSelectedRegion={setSelectedRegion} 
+    />
+  )}
+
+  {activeTab === "barras" && (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <BarChartComponent data={dataSets.comp} dataKey="Habitantes" title="Población por Continente" />
+      <BarChartComponent data={dataSets.flores} dataKey="Cantidad de flores" title="Producción de Flores" />
+    </div>
+  )}
                 {activeTab === "lineas" && (
                   <div className="flex flex-col gap-6">
                     <PopulationTimeline data={dataSets.tendPob} title="Tendencia de Población" />
