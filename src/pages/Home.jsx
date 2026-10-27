@@ -7,6 +7,7 @@ import BarChartComponent from "../components/BarChartComponent";
 import PopulationTimeline from "../components/PopulationTimeline";
 import ConflictChart from "../components/ConflictChart";
 import HistoryCompendium from "../components/HistoryCompendium";
+import FloraViewer from "../components/FloraViewer"; // <-- NUEVO COMPONENTE DE LA FLOR
 
 // Importación de íconos vectoriales profesionales (Lucide React)
 import { 
@@ -21,12 +22,11 @@ import {
   Users, 
   Building2, 
   Maximize2,
-  ChevronRight
+  ChevronRight,
+  Flower2 // <-- NUEVO ICONO PARA LA FLOR
 } from "lucide-react";
 
-// ==========================================
 // SÍMBOLOS VECTORIALES PERSONALIZADOS POR REGIÓN
-// ==========================================
 export function RajiraSymbol({ className = "w-5 h-5", color = "#FF3366" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -78,16 +78,13 @@ export function RegionSymbol({ region, className = "w-5 h-5" }) {
   );
 }
 
-// ==========================================
-// COMPONENTE PRINCIPAL HOME
-// ==========================================
 export default function Home() {
   const [dataSets, setDataSets] = useState({});
   const [loading, setLoading] = useState(true);
   
-  const [activeTab, setActiveTab] = useState("mapa"); // mapa, barras, lineas, conflictos
+  const [activeTab, setActiveTab] = useState("mapa"); 
   const [selectedRegion, setSelectedRegion] = useState("Rajira"); 
-  const [activeSidebarNav, setActiveSidebarNav] = useState("resumen"); 
+  const [activeSidebarNav, setActiveSidebarNav] = useState("resumen"); // 'resumen', 'mapa', 'comparativas', 'tendencias', 'conflictos', 'historia', 'flora'
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -137,6 +134,7 @@ export default function Home() {
               { id: "tendencias", label: "Tendencias", icon: TrendingUp },
               { id: "conflictos", label: "Conflictos", icon: ShieldAlert },
               { id: "historia", label: "Historia y Lore", icon: BookOpen },
+              { id: "flora", label: "Flor de Rajira", icon: Flower2 }, // <-- NUEVA PESTAÑA EN SIDEBAR
             ].map(item => {
               const IconComponent = item.icon;
               const isActive = activeSidebarNav === item.id;
@@ -214,47 +212,48 @@ export default function Home() {
           </div>
         ) : activeSidebarNav === "historia" ? (
           <HistoryCompendium />
+        ) : activeSidebarNav === "flora" ? (
+          <FloraViewer /> // <-- RENDERIZA EL VISOR DE LA FLOR DE RAJIRA
         ) : (
           <div className="max-w-6xl mx-auto flex flex-col gap-6">
 
-            {/* Cabecera Principal con Emblema a la Izquierda del Nombre */}
-<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#21262D] pb-6">
-  <div>
-    <span className="text-[11px] font-mono uppercase tracking-widest text-[#8B949E] flex items-center gap-1.5">
-      <Globe className="w-3.5 h-3.5 text-[#FF3366]" /> REGIÓN SELECCIONADA
-    </span>
-    
-    {/* Título de la Región con el Símbolo a la Izquierda */}
-    <div className="flex items-center gap-3.5 mt-2">
-      <div className="w-10 h-10 rounded-xl bg-[#161B22] border border-[#30363D] flex items-center justify-center shadow-lg shrink-0">
-        <RegionSymbol region={selectedRegion} className="w-6 h-6" />
-      </div>
-      <h2 className="text-4xl font-serif font-bold text-[#F0F6FC]">
-        {selectedRegion === "Todas" ? "Panorama Continental" : selectedRegion}
-      </h2>
-    </div>
+            {/* Cabecera Principal */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#21262D] pb-6">
+              <div>
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#8B949E] flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#FF3366]" /> REGIÓN SELECCIONADA
+                </span>
+                
+                <div className="flex items-center gap-3.5 mt-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#161B22] border border-[#30363D] flex items-center justify-center shadow-lg shrink-0">
+                    <RegionSymbol region={selectedRegion} className="w-6 h-6" />
+                  </div>
+                  <h2 className="text-4xl font-serif font-bold text-[#F0F6FC]">
+                    {selectedRegion === "Todas" ? "Panorama Continental" : selectedRegion}
+                  </h2>
+                </div>
 
-    <p className="text-sm text-[#8B949E] mt-2 max-w-xl">
-      {selectedRegion === "Todas" 
-        ? "Visión global e integrada de las tres grandes naciones del mundo." 
-        : currentRegionInfo.lore}
-    </p>
-  </div>
+                <p className="text-sm text-[#8B949E] mt-2 max-w-xl">
+                  {selectedRegion === "Todas" 
+                    ? "Visión global e integrada de las tres grandes naciones del mundo." 
+                    : currentRegionInfo.lore}
+                </p>
+              </div>
 
-  {/* Selector desplegable superior */}
-  <div className="flex items-center">
-    <select
-      value={selectedRegion}
-      onChange={(e) => setSelectedRegion(e.target.value)}
-      className="bg-[#161B22] border border-[#30363D] text-sm font-medium rounded-lg px-4 py-2.5 text-[#F0F6FC] focus:outline-none focus:border-[#8B949E]"
-    >
-      <option value="Todas">Todas las regiones</option>
-      <option value="Rajira">Rajira</option>
-      <option value="Arpenia">Arpenia</option>
-      <option value="Mareina">Mareina</option>
-    </select>
-  </div>
-</div>
+              {/* Selector desplegable superior */}
+              <div className="flex items-center">
+                <select
+                  value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className="bg-[#161B22] border border-[#30363D] text-sm font-medium rounded-lg px-4 py-2.5 text-[#F0F6FC] focus:outline-none focus:border-[#8B949E]"
+                >
+                  <option value="Todas">Todas las regiones</option>
+                  <option value="Rajira">Rajira</option>
+                  <option value="Arpenia">Arpenia</option>
+                  <option value="Mareina">Mareina</option>
+                </select>
+              </div>
+            </div>
 
             {/* Pestañas de Navegación Superior */}
             <div className="flex border-b border-[#21262D] gap-8">
@@ -285,7 +284,7 @@ export default function Home() {
               ))}
             </div>
 
-            {/* BANNERS SUPERIORES CON SÍMBOLOS VECTORIALES, HABITANTES Y SPARKLINE */}
+            {/* BANNERS SUPERIORES */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {["Rajira", "Arpenia", "Mareina"].map((regName) => {
                 const reg = REGIONS[regName];
@@ -301,7 +300,6 @@ export default function Home() {
                     }`}
                     style={{ borderLeft: `4px solid ${reg.color}` }}
                   >
-                    {/* Cabecera del Banner con Emblema Vectorial */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-[#0D1117] border border-[#30363D] flex items-center justify-center shadow-inner">
@@ -312,7 +310,6 @@ export default function Home() {
                       <ChevronRight className="w-4 h-4 text-[#8B949E]" />
                     </div>
 
-                    {/* Cifras y Sparkline */}
                     <div className="flex items-end justify-between mt-2">
                       <div>
                         <span className="text-[10px] font-mono text-[#8B949E] uppercase tracking-wider block">CAPITAL</span>
@@ -323,7 +320,6 @@ export default function Home() {
                         <span className="text-[11px] font-mono text-[#8B949E]">habitantes registrados</span>
                       </div>
 
-                      {/* Sparkline al lado */}
                       <div className="flex items-end gap-1 h-10 opacity-80">
                         {[35, 55, 45, 75, 65, 90].map((val, i) => (
                           <span
@@ -339,24 +335,22 @@ export default function Home() {
               })}
             </div>
 
-            {/* GRID PRINCIPAL: MAPA (70%) + FICHA TÉCNICA (30%) */}
+            {/* GRID PRINCIPAL: MAPA + FICHA TÉCNICA */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               <div className="lg:col-span-2 bg-[#161B22]/60 border border-[#30363D] rounded-xl p-6 shadow-xl backdrop-blur-md">
-  
-  {activeTab === "mapa" && (
-    <WorldMap 
-      selectedRegion={selectedRegion} 
-      setSelectedRegion={setSelectedRegion} 
-    />
-  )}
-
-  {activeTab === "barras" && (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <BarChartComponent data={dataSets.comp} dataKey="Habitantes" title="Población por Continente" />
-      <BarChartComponent data={dataSets.flores} dataKey="Cantidad de flores" title="Producción de Flores" />
-    </div>
-  )}
+                {activeTab === "mapa" && (
+                  <WorldMap 
+                    selectedRegion={selectedRegion} 
+                    setSelectedRegion={setSelectedRegion} 
+                  />
+                )}
+                {activeTab === "barras" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <BarChartComponent data={dataSets.comp} dataKey="Habitantes" title="Población por Continente" />
+                    <BarChartComponent data={dataSets.flores} dataKey="Cantidad de flores" title="Producción de Flores" />
+                  </div>
+                )}
                 {activeTab === "lineas" && (
                   <div className="flex flex-col gap-6">
                     <PopulationTimeline data={dataSets.tendPob} title="Tendencia de Población" />
@@ -371,7 +365,7 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Ficha Lateral de la Región */}
+              {/* Ficha Lateral */}
               <div className="flex flex-col gap-6">
                 
                 <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 shadow-xl">
@@ -420,7 +414,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Tarjeta Distribución Territorial */}
+                {/* Distribución Territorial */}
                 <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 shadow-xl">
                   <h4 className="font-serif font-bold text-base text-white mb-1">
                     Distribución territorial
